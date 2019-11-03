@@ -1,4 +1,5 @@
 module.exports = {
+    // publicPath : '/guagua',
     devServer : {
         proxy : {
             '/api' : {
