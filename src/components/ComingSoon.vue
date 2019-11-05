@@ -34,7 +34,7 @@ export default {
         var cityId = this.$store.state.city.id;
         if( this.prevCityId == cityId ){ return }
         this.isLoading = true;
-        this.axios.get('/api/movieComingList?cityId=10').then((res) => {
+        this.axios.get('/api/movieComingList?cityId='+cityId).then((res) => {
             window.console.log(res)
             let msg = res.data.msg;
             if( msg === 'ok'){

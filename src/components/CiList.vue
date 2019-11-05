@@ -2,8 +2,9 @@
   <div class="cinema_body">
     <Loading v-if="isLoading" />
     <Scroller v-else>
-      <ul>
-        <li v-for="(item) in cinemaList" :key="item.id">
+      <ul >
+
+        <li v-for="(item,idx) in cinemaList" :key="item.id">
           <div>
             <span>{{item.nm}}</span>
             <span class="q">
@@ -14,9 +15,16 @@
             <span>{{item.addr}}</span>
             <span>{{item.distance}}</span>
           </div>
-          <div class="card">
-                <div v-for="(value,key) in item.tag"  :key="key" :class="key | classCard" >{{ key | formatCard }}</div>
-          </div>
+          <div class="card" >
+            <div
+              v-for="(val,key) in filtersList[idx]"
+              :key="key"
+              :class="key | classCard"
+            >{{ key | formatCard }}</div>
+            <!-- <div v-for="(num,key) in item.tag"  :key="key" :class=" key | classCard ">
+              {{ key | formatCard }}
+            </div> -->
+          </div> 
         </li>
       </ul>
     </Scroller>
@@ -30,25 +38,50 @@ export default {
     return {
       cinemaList: [],
       isLoading: true,
-       prevCityId : -1
+      prevCityId: -1
     };
   },
-  
+
+  computed: {
+    filtersList: function() {
+      let Array = [];
+      for (let i = 0, len = this.cinemaList.length; i < len; i++) {
+        let o = this.cinemaList[i].tag;
+
+        let obj = new Object();
+        let arr = [];
+        for (let k in o) {
+          if (o[k] == 1) {
+            arr.push(`${k}=${o[k]}`);
+          }
+        }
+        arr.forEach(function(item) {
+          var temp = item.split("=");
+          obj[temp[0]] = temp[1];
+        });
+
+        Array.push(obj);
+      }
+      return Array
+    }
+  },
+
   activated() {
-     var cityId = this.$store.state.city.id;
-        if( this.prevCityId == cityId ){ return }
-        this.isLoading = true;
-        
-      this.axios.get("/api/cinemaList?cityId="+cityId).then(res => {
+    var cityId = this.$store.state.city.id;
+    if (this.prevCityId == cityId) {
+      return;
+    }
+    this.isLoading = true;
+
+    this.axios.get("/api/cinemaList?cityId=" + cityId).then(res => {
       let msg = res.data.msg;
       if (msg === "ok") {
         this.cinemaList = res.data.data.cinemas;
-        this.isLoading = false
+        this.isLoading = false;
+        this.prevCityId = cityId;
       }
     });
   },
-
-
 
   filters: {
     formatCard(key) {
@@ -58,26 +91,26 @@ export default {
         { key: "sell", value: "折扣卡" },
         { key: "snack", value: "小吃" }
       ];
-      for(let i=0; i<card.length; i++){
-        if(card[i].key === key){
+      for (let i = 0; i < card.length; i++) {
+        if (card[i].key === key) {
           return card[i].value;
         }
       }
-      return '';
+      return "";
     },
-    classCard(key){
+    classCard(key) {
       var card = [
-         { key : 'allowRefund' , value : 'bl' },
-        { key : 'endorse' , value : 'bl' },
-        { key : 'sell' , value : 'or' },
-        { key : 'snack' , value : 'or'}
+        { key: "allowRefund", value: "bl" },
+        { key: "endorse", value: "bl" },
+        { key: "sell", value: "or" },
+        { key: "snack", value: "or" }
       ];
-      for(let i=0; i<card.length; i++){
-        if(card[i].key === key){
+      for (let i = 0; i < card.length; i++) {
+        if (card[i].key === key) {
           return card[i].value;
         }
       }
-      return ''
+      return "";
     }
   }
 };
